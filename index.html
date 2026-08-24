@@ -1,1 +1,112 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#6d59d9">
+<title>HYWYD — Helping You With Your Day!</title>
+<style>
+:root{--p:#6d59d9;--bg:#f6f5fb;--card:#fff;--text:#222;--muted:#777;--line:#e9e7f0}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Noto Sans JP",sans-serif}
+#app{max-width:600px;margin:auto;min-height:100vh;background:var(--card);box-shadow:0 0 30px #0001}
+header{position:sticky;top:0;z-index:5;height:64px;padding:10px 16px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;background:#fffffff2;backdrop-filter:blur(12px)}
+.brand{display:flex;gap:10px;align-items:center;font-size:20px;font-weight:900}.logo{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;background:linear-gradient(135deg,#7e6ae8,#4e40a9);color:#fff;font-size:21px}
+main{padding:16px 16px 100px}.page{display:none}.page.active{display:block}
+h1{font-size:25px;margin:5px 0 4px}h2{font-size:18px;margin:20px 0 10px}.muted{color:var(--muted);font-size:13px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:14px}.hero{background:linear-gradient(135deg,#7160dc,#4b3da0);color:#fff;border-radius:22px;padding:18px}.big{font-size:30px;font-weight:900}.progress{height:8px;background:#e9e7f3;border-radius:99px;overflow:hidden}.progress span{display:block;height:100%;background:var(--p);border-radius:99px}
+.btn{border:0;border-radius:13px;padding:11px 14px;background:var(--p);color:#fff;font-weight:800;font-size:14px}.btn.alt{background:#eeebff;color:#5947c2}.btn.gray{background:#eee;color:#444}.row{display:flex;align-items:center;justify-content:space-between;gap:8px}.input,textarea,select{width:100%;padding:11px;border:1px solid #ddd;border-radius:12px;background:#fff;font:inherit}textarea{min-height:140px}
+.mission{display:flex;align-items:center;gap:10px;border:1px solid var(--line);border-radius:15px;padding:12px;margin:8px 0}.mission .icon{font-size:23px}.mission .body{flex:1}.mission.done{opacity:.65}.check{width:27px;height:27px;border:2px solid #ddd;border-radius:50%;display:grid;place-items:center}.done .check{background:#55b982;color:#fff;border-color:#55b982}
+.store{display:grid;grid-template-columns:1fr 1fr;gap:10px}.product{border:1px solid var(--line);border-radius:17px;padding:10px}.product .pic{aspect-ratio:1;border-radius:13px;display:grid;place-items:center;font-size:40px;background:#f0edff;margin-bottom:8px}.product button{width:100%;margin-top:7px}
+nav{position:fixed;z-index:10;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:600px;height:70px;border-top:1px solid var(--line);background:#fffffff2;backdrop-filter:blur(12px);display:flex;justify-content:space-around;align-items:center}nav button{border:0;background:none;color:#777;font-size:11px;font-weight:700}nav button.active{color:var(--p)}nav b{display:block;font-size:20px}.plus{width:47px;height:47px;border-radius:50%;background:var(--p);color:#fff!important;font-size:25px!important}
+.toast{display:none;position:fixed;z-index:30;bottom:84px;left:50%;transform:translateX(-50%);background:#222;color:#fff;padding:10px 15px;border-radius:99px;white-space:nowrap}
+.badges{display:grid;grid-template-columns:1fr 1fr;gap:9px}.badge{border:1px solid var(--line);border-radius:15px;padding:12px}.badge.lock{opacity:.4}.chart{height:145px;display:flex;align-items:end;gap:6px;border-bottom:1px solid #ddd;padding:7px}.bar{flex:1;background:#8b79e3;border-radius:5px 5px 0 0;min-height:3px}
+</style>
+</head>
+<body>
+<div id="app">
+<header><div class="brand"><div class="logo">☀︎🌙</div>HYWYD</div><b id="headLv">Lv.1</b></header>
+<main>
+<section id="home" class="page active">
+<h1>おかえり！</h1><p class="muted">今日も自分の1日をちょっと良くしよう。</p>
+<div class="grid">
+<div class="card"><span class="muted">レベル</span><div class="big" id="lv">1</div><small id="xpText">0 / 100 XP</small><div class="progress"><span id="xpBar"></span></div></div>
+<div class="card"><span class="muted">コイン</span><div class="big">🪙 <span id="coins">100</span></div></div>
+</div>
+<div class="hero" style="margin-top:10px"><div class="row"><b>🔥 ストリーク</b><span id="streak">1日</span></div><p>毎日ちょっとずつ続けよう！</p><div class="progress" style="background:#ffffff40"><span style="width:55%;background:#fff"></span></div></div>
+<h2>🎯 今日のミッション</h2><div id="missions"></div>
+</section>
 
+<section id="sleep" class="page"><h2>🌙 睡眠</h2>
+<div class="hero" style="text-align:center"><div class="muted" style="color:#dfe4ff">推定睡眠時間</div><div class="big" id="sleepResult">--時間 --分</div></div>
+<div class="card" style="margin-top:10px"><label class="muted">就寝予定</label><input id="bed" class="input" type="time" value="21:00"><button class="btn" style="width:100%;margin-top:8px" onclick="sleepStart()">睡眠監視を開始</button><p class="muted" id="sleepStatus">HYWYDから離れた時間を使って推定します。</p></div>
+</section>
+
+<section id="record" class="page"><h2>＋ 記録</h2>
+<div class="grid">
+<div class="card"><b>🏃 運動</b><div class="big"><span id="exercise">0</span>分</div><button class="btn" onclick="record('exercise',10)">+10分</button></div>
+<div class="card"><b>📚 勉強</b><div class="big"><span id="study">0</span>分</div><button class="btn alt" onclick="record('study',10)">+10分</button></div>
+</div>
+<div class="card" style="margin-top:10px"><b>🧹 お手伝い</b><div class="big"><span id="help">0</span>分</div><button class="btn alt" onclick="record('help',10)">+10分</button></div>
+</section>
+
+<section id="diary" class="page"><h2>📖 AI日記</h2>
+<div class="card"><b>今日の出来事を話してね</b><p class="muted">音声入力または文字入力に対応。</p><button class="btn alt" onclick="voice()">🎙️ 音声入力</button></div>
+<textarea id="diaryInput" placeholder="今日は何をした？どんな気分だった？"></textarea>
+<button class="btn" style="width:100%;margin-top:8px" onclick="makeDiary()">✨ 要点をまとめて日記完成</button>
+<h2>今日の日記</h2><div class="card" id="diaryOut">まだありません。</div>
+</section>
+
+<section id="store" class="page"><h2>🛍️ ストア</h2><div class="card"><b>Lv.<span id="storeLv">1</span></b><span style="float:right">🪙 <span id="storeCoins">100</span></span><p class="muted">レベルで解放されたアイテムをコインで購入。</p></div><div class="store" id="products"></div></section>
+
+<section id="more" class="page"><h2>✨ もっとHYWYD</h2>
+<div class="grid">
+<div class="card" onclick="show('stats')">📊<b> グラフ</b><p class="muted">1週間の記録を見る</p></div>
+<div class="card" onclick="show('achievements')">🏆<b> 実績</b><p class="muted">バッジを集める</p></div>
+<div class="card" onclick="show('calendar')">📅<b> カレンダー</b><p class="muted">日記と記録を見る</p></div>
+<div class="card" onclick="show('settings')">⚙️<b> 設定</b><p class="muted">通知・データ</p></div>
+</div></section>
+
+<section id="stats" class="page"><h2>📊 グラフ</h2><div class="card"><b>運動</b><div class="chart" id="exerciseChart"></div></div><div class="card" style="margin-top:10px"><b>獲得XP</b><div class="chart" id="xpChart"></div></div></section>
+<section id="achievements" class="page"><h2>🏆 実績</h2><div class="badges" id="badges"></div></section>
+<section id="calendar" class="page"><h2>📅 カレンダー</h2><div class="card" id="calendarBox"></div><div class="card" style="margin-top:10px" id="calendarDetail">日付を選択すると記録が表示されます。</div></section>
+<section id="settings" class="page"><h2>⚙️ 設定</h2>
+<div class="card"><b>🔔 通知</b><p class="muted">通知を許可すると、対応する端末でリマインダーを利用できます。</p><button class="btn" onclick="notify()">通知を許可</button></div>
+<div class="card" style="margin-top:10px"><b>🎨 テーマ</b><div class="row" style="margin-top:8px"><button class="btn alt" onclick="setTheme('#6d59d9')">紫</button><button class="btn alt" onclick="setTheme('#e89b39')">太陽</button><button class="btn alt" onclick="setTheme('#384a9b')">夜</button></div></div>
+<div class="card" style="margin-top:10px"><b>💾 データ</b><button class="btn alt" style="margin-top:8px" onclick="backup()">バックアップ</button></div>
+</section>
+</main>
+<nav><button data-page="home">🏠<b>ホーム</b></button><button data-page="sleep">🌙<b>睡眠</b></button><button class="plus" data-page="record">＋</button><button data-page="diary">📖<b>日記</b></button><button data-page="store">🛍️<b>ストア</b></button></nav>
+<div id="toast" class="toast"></div>
+</div>
+<script>
+const key='hywyd_formal_v1';
+const base={xp:0,coins:100,level:1,streak:1,done:{},records:{exercise:0,study:0,help:0},diary:'',history:{},owned:[],theme:'#6d59d9',sleep:0,stats:{xp:[],exercise:[]}};
+let d=JSON.parse(localStorage.getItem(key)||'null')||base;d={...base,...d,records:{...base.records,...(d.records||{})},stats:{...base.stats,...(d.stats||{})}};
+const missions=[['⏰','7:00までに起きる',50,30,'wake'],['🏃','運動30分',80,40,'exercise'],['📚','勉強30分',80,40,'study'],['🧹','お手伝い',60,35,'help'],['😴','睡眠目標',70,30,'sleep'],['🎙️','AI日記完成',50,30,'diary'],['🔥','今日の継続',40,20,'streak']];
+const products=[['sun','☀️','サンテーマ',1,300],['night','🌙','ナイトテーマ',2,350],['mint','🌿','ミントテーマ',3,400],['rocket','🚀','ロケット',4,450],['cat','🐱','ねこ',5,550],['space','🌌','宇宙',6,600],['star','⭐','スター',7,650],['crown','👑','王冠',8,800],['ocean','🌊','オーシャン',9,700],['rainbow','🌈','レインボー',10,900]];
+function save(){localStorage.setItem(key,JSON.stringify(d));render()}function need(){return d.level*100}
+function toast(x){let t=document.getElementById('toast');t.textContent=x;t.style.display='block';clearTimeout(window.tt);window.tt=setTimeout(()=>t.style.display='none',1800)}
+function xp(n,c){d.xp+=n;d.coins+=c;while(d.xp>=need()){d.xp-=need();d.level++;toast('🎉 Lv.'+d.level+'！')}d.stats.xp.push({date:new Date().toISOString().slice(0,10),v:n})}
+function complete(k,n,c){if(d.done[k])return;d.done[k]=1;xp(n,c);toast('+'+n+' XP　🪙 +'+c);save()}
+function record(type,n){d.records[type]+=n;d.stats.exercise.push({date:new Date().toISOString().slice(0,10),v:type==='exercise'?n:0});if(type==='exercise'&&d.records.exercise>=30)complete('exercise',80,40);if(type==='study'&&d.records.study>=30)complete('study',80,40);if(type==='help')complete('help',60,35);save();toast('記録したよ！')}
+function render(){document.getElementById('lv').textContent=d.level;document.getElementById('headLv').textContent='Lv.'+d.level;document.getElementById('storeLv').textContent=d.level;document.getElementById('coins').textContent=d.coins;document.getElementById('storeCoins').textContent=d.coins;document.getElementById('streak').textContent=d.streak+'日';document.getElementById('exercise').textContent=d.records.exercise;document.getElementById('study').textContent=d.records.study;document.getElementById('help').textContent=d.records.help;document.getElementById('xpText').textContent=d.xp+' / '+need()+' XP';document.getElementById('xpBar').style.width=(d.xp/need()*100)+'%';document.getElementById('sleepResult').textContent=d.sleep||'--時間 --分';document.getElementById('diaryOut').textContent=d.diary||'まだありません。';
+document.getElementById('missions').innerHTML=missions.map(m=>`<div class="mission ${d.done[m[4]]?'done':''}" onclick="complete('${m[4]}',${m[2]},${m[3]})"><div class="icon">${m[0]}</div><div class="body"><b>${m[1]}</b><div class="muted">+${m[2]} XP　🪙 +${m[3]}</div></div><div class="check">${d.done[m[4]]?'✓':''}</div></div>`).join('');
+document.getElementById('products').innerHTML=products.map(p=>`<div class="product"><div class="pic">${p[1]}</div><b>${p[2]}</b><div class="muted">Lv.${p[3]}　🪙${p[4]}</div><button class="btn ${d.owned.includes(p[0])?'gray':''}" onclick="buy('${p[0]}')">${d.owned.includes(p[0])?'購入済み':'購入'}</button></div>`).join('');
+renderCharts();renderBadges();renderCalendar();document.documentElement.style.setProperty('--p',d.theme)}
+function buy(id){let p=products.find(x=>x[0]===id);if(d.level<p[3])return toast('🔒 Lv.'+p[3]+'で解放');if(d.owned.includes(id))return toast('もう持ってるよ');if(d.coins<p[4])return toast('🪙 コイン不足');d.coins-=p[4];d.owned.push(id);save();toast('🛍️ 購入！')}
+function makeDiary(){let t=document.getElementById('diaryInput').value.trim();if(!t)return toast('まず出来事を入力してね');let s=t.split(/[。！？]/).map(x=>x.trim()).filter(Boolean).slice(0,5);d.diary='今日の1日\\n\\n'+s.map(x=>'・'+x+'。').join('\\n')+'\\n\\n運動：'+d.records.exercise+'分 / 勉強：'+d.records.study+'分 / お手伝い：'+d.records.help+'分\\n\\n今日も一日おつかれさま！';d.history[new Date().toISOString().slice(0,10)]=d.diary;complete('diary',50,30);save()}
+function voice(){let R=window.SpeechRecognition||window.webkitSpeechRecognition;if(!R)return toast('この端末では音声入力を使えません');let r=new R();r.lang='ja-JP';r.onresult=e=>document.getElementById('diaryInput').value=e.results[0][0].transcript;r.start();toast('🎙️ 話してね')}
+function sleepStart(){d.sleepAway=Date.now();localStorage.setItem(key,JSON.stringify(d));document.getElementById('sleepStatus').textContent='監視中。HYWYDを離れた時間から推定します。';toast('🌙 睡眠監視スタート')}
+document.addEventListener('visibilitychange',()=>{if(document.hidden){if(d.sleepAway)localStorage.setItem(key,JSON.stringify(d));return}if(d.sleepAway){let h=(Date.now()-d.sleepAway)/3600000;if(h>=2){let hh=Math.floor(h),mm=Math.floor((h-hh)*60);d.sleep=hh+'時間 '+String(mm).padStart(2,'0')+'分';complete('sleep',70,30)}d.sleepAway=null;save()}});
+function show(id){document.querySelectorAll('.page').forEach(x=>x.classList.toggle('active',x.id===id));window.scrollTo(0,0)}
+document.querySelectorAll('nav [data-page]').forEach(b=>b.onclick=()=>show(b.dataset.page));
+function renderCharts(){let a=Array(7).fill(0),b=Array(7).fill(0);d.stats.exercise.slice(-7).forEach((x,i)=>a[i]=x.v);d.stats.xp.slice(-7).forEach((x,i)=>b[i]=x.v);document.getElementById('exerciseChart').innerHTML=a.map(x=>`<i class="bar" style="height:${Math.max(4,Math.min(130,x))}px"></i>`).join('');document.getElementById('xpChart').innerHTML=b.map(x=>`<i class="bar" style="height:${Math.max(4,Math.min(130,x/2))}px"></i>`).join('')}
+function renderBadges(){let total=d.stats.xp.reduce((a,b)=>a+b.v,0);let arr=[['🌱','はじめの一歩',Object.keys(d.done).length>0],['🔥','3日連続',d.streak>=3],['⭐','XP500',total>=500],['🪙','コイン1000',d.coins>=1000],['🏃','運動60分',d.records.exercise>=60],['📖','日記7日',Object.keys(d.history).length>=7],['🚀','Lv.5',d.level>=5],['🛍️','3商品購入',d.owned.length>=3]];document.getElementById('badges').innerHTML=arr.map(x=>`<div class="badge ${x[2]?'':'lock'}"><div style="font-size:30px">${x[0]}</div><b>${x[1]}</b></div>`).join('')}
+function renderCalendar(){let now=new Date(),y=now.getFullYear(),m=now.getMonth(),last=new Date(y,m+1,0).getDate();document.getElementById('calendarBox').innerHTML='<div class="grid">'+Array.from({length:last},(_,i)=>{let day=i+1,k=y+'-'+String(m+1).padStart(2,'0')+'-'+String(day).padStart(2,'0');return `<button class="btn ${d.history[k]?'':'alt'}" onclick="document.getElementById('calendarDetail').textContent=d.history['${k}']||'この日の保存データはありません。'">${day}</button>`}).join('')+'</div>'}
+async function notify(){if(!('Notification'in window))return toast('この端末では未対応');let p=await Notification.requestPermission();toast(p==='granted'?'🔔 通知OK':'通知は許可されませんでした')}
+function setTheme(c){d.theme=c;save();toast('🎨 テーマ変更！')}
+function backup(){let a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(d)],{type:'application/json'}));a.download='HYWYD-backup.json';a.click()}
+render();
+</script>
+</body>
+</html>
